@@ -9,9 +9,9 @@ const debug = false
 
 type PriorityQueue interface {
 	IsEmpty() bool
-	Size() int64
+	Size() int
 
-	Capacity() int64
+	Capacity() int
 
 	// Returns priority of the key and error
 	Get(key string) (int64, error)
@@ -69,7 +69,7 @@ func (s *smaller) Compare(p1, p2 int64) int {
 
 // The elements inside a HashedPQ
 type heapElement struct {
-	index int64 // Index in heap array
+	index int // Index in heap array
 	key   string
 	p     int64 // Priority
 }
@@ -86,13 +86,13 @@ type HashedPQ struct {
 	pqType   PQType
 	a        []*heapElement
 	table    map[string]*heapElement
-	n        int64 // Number of elements in PQ
-	capacity int64
+	n        int // Number of elements in PQ
+	capacity int
 
 	comparator Comparator
 }
 
-func NewHashedPQ(pqType PQType, capacity int64) PriorityQueue {
+func NewHashedPQ(pqType PQType, capacity int) PriorityQueue {
 	heap := &HashedPQ{
 		pqType:   pqType,
 		a:        make([]*heapElement, capacity),
@@ -114,11 +114,11 @@ func (pq *HashedPQ) IsEmpty() bool {
 	return pq.n <= 0
 }
 
-func (pq *HashedPQ) Size() int64 {
+func (pq *HashedPQ) Size() int {
 	return pq.n
 }
 
-func (pq *HashedPQ) Capacity() int64 {
+func (pq *HashedPQ) Capacity() int {
 	return pq.capacity
 }
 
@@ -164,14 +164,14 @@ func (pq *HashedPQ) Put(key string, priority int64) (bool, error) {
 	return false, nil
 }
 
-func (pq *HashedPQ) swim(k int64) {
+func (pq *HashedPQ) swim(k int) {
 	for k > 1 && pq.comparator.Compare(pq.a[k/2].p, pq.a[k].p) > 0 {
 		pq.exch(k, k/2)
 		k = k / 2
 	}
 }
 
-func (pq *HashedPQ) sink(k int64) {
+func (pq *HashedPQ) sink(k int) {
 	for 2*k <= pq.n {
 		j := 2 * k
 
@@ -188,7 +188,7 @@ func (pq *HashedPQ) sink(k int64) {
 	}
 }
 
-func (pq *HashedPQ) exch(i, j int64) {
+func (pq *HashedPQ) exch(i, j int) {
 	tmp := pq.a[i]
 	pq.a[i] = pq.a[j]
 	pq.a[i].index = i
@@ -239,7 +239,7 @@ func (pq *HashedPQ) First() (string, int64, error) {
 }
 
 func (pq *HashedPQ) Dequeue() (string, int64, error) {
-	if pq.n <= 1 {
+	if pq.n <= 0 {
 		return "", 0, fmt.Errorf("DEQUEUE empty heap")
 	}
 
